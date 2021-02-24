@@ -16,13 +16,19 @@ class TextHandler {
         std::map<char, int>* numbersStatistics;
         std::set<char>* specialSymbols;
         std::map<char, int>* specialSymbolsStatistics;
+        std::set<std::string>* words;
+
+
         long long quantity;
+
+        bool is_Word;
 
         void insert(char symbol, std::set<char>* lst);
         void insert(char symbol, std::map<char, int>* lst);
         bool isLetter(char symbol);
         bool isNumber(char symbol);
         bool isSpecial(char symbol);
+        bool isWord(char symbol);
     public:
         TextHandler(const char* filename);
         ~TextHandler();
@@ -34,8 +40,13 @@ class TextHandler {
         const std::set<char>& getSpecialSymbols() const;
         const std::map<char, int>& getSpecialSymbolsStatistics() const;
         long long getQuantity() const;
+        const std::set<std::string>& getWords() const;
 
         void parseText();
+
+        long long countWord;
+
+        std::string word;
 };
 
 std::ostream& operator<<(std::ostream& out, const TextHandler& handler);

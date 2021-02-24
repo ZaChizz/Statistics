@@ -7,7 +7,11 @@ TextHandler::TextHandler(const char* filename) : filename(filename) {
     numbersStatistics = new std::map<char, int>();
     specialSymbols = new std::set<char>();
     specialSymbolsStatistics = new std::map<char, int>();
+    words = new std::set<std::string>();
+    is_Word = false;
     quantity = 0;
+    countWord = 0;
+    word = "";
 }
 
 TextHandler::~TextHandler() {
@@ -37,6 +41,10 @@ const std::set<char>& TextHandler::getSpecialSymbols() const {
 const std::map<char, int>& TextHandler::getSpecialSymbolsStatistics() const {
     return *specialSymbolsStatistics;
 }
+const std::set<std::string>& TextHandler::getWords() const {
+    return *words;
+}
+
 long long TextHandler::getQuantity() const {
     return quantity;
 }
@@ -58,6 +66,23 @@ bool TextHandler::isLetter(char symbol) {
 bool TextHandler::isNumber(char symbol) {
     return symbol >= '0' && symbol <= '9';
 }
+
+bool TextHandler::isWord(char symbol) {
+    if ( isLetter(symbol) ) {
+        is_Word = true;
+        word += static_cast<char>(symbol);
+    }
+    if ( isNumber(symbol) || isSpecial(symbol) || symbol == 32 ) {
+        if(is_Word) {
+            is_Word = false;
+            words->insert(word);
+            word = "";
+            return true;
+        }
+    }
+    return false;
+}
+
 bool TextHandler::isSpecial(char symbol) {
     bool special = false;
 
@@ -94,6 +119,10 @@ void TextHandler::parseText() {
             insert(symbol, specialSymbolsStatistics);
             quantity += 1;
         }
+        if ( isWord(symbol) ) {
+            //insert(word, words);
+            countWord += 1;
+        }
     }
     file.close();
 }
@@ -114,5 +143,8 @@ std::ostream& operator<<(std::ostream& out, const TextHandler& handler) {
     out << "Unique: " << handler.getSpecialSymbols() << std::endl;
     out << "Matches in text: " << std::endl;
     out << handler.getSpecialSymbolsStatistics() << std::endl;
+
+    out << "Words count: " << handler.countWord << std::endl;
+    out << "Words found: " << handler.getWords() << std::endl;
     return out;
 }
