@@ -8,9 +8,10 @@ TextHandler::TextHandler(const char* filename) : filename(filename) {
     specialSymbols = new std::set<char>();
     specialSymbolsStatistics = new std::map<char, int>();
     words = new std::set<std::string>();
+    wordsStatistics = new std::map<std::string, int>();
     is_Word = false;
     quantity = 0;
-    countWord = 0;
+    quantityWords = 0;
     word = "";
 }
 
@@ -45,8 +46,16 @@ const std::set<std::string>& TextHandler::getWords() const {
     return *words;
 }
 
+const std::map<std::string, int>& TextHandler::getWordsStatistics() const {
+    return *wordsStatistics;
+}
+
 long long TextHandler::getQuantity() const {
     return quantity;
+}
+
+long long TextHandler::getQuantityWords() const {
+    return quantityWords;
 }
 
 void TextHandler::insert(char symbol, std::set<char>* lst) {
@@ -58,6 +67,17 @@ void TextHandler::insert(char symbol, std::map<char, int>* lst) {
         lst->insert(std::pair<char, int>(symbol, 0));
     }
     lst->at(symbol) += 1;
+}
+
+void TextHandler::insert(std::string word, std::set<std::string>* lst) {
+    lst->insert(word);
+}
+
+void TextHandler::insert(std::string word, std::map<std::string, int>* lst) {
+    if ( lst->find(word) == lst->end() ) {
+        lst->insert(std::pair<std::string, int>(word, 0));
+    }
+    lst->at(word) += 1;
 }
 
 bool TextHandler::isLetter(char symbol) {
@@ -75,8 +95,6 @@ bool TextHandler::isWord(char symbol) {
     if ( isNumber(symbol) || isSpecial(symbol) || symbol == 32 ) {
         if(is_Word) {
             is_Word = false;
-            words->insert(word);
-            word = "";
             return true;
         }
     }
@@ -120,8 +138,10 @@ void TextHandler::parseText() {
             quantity += 1;
         }
         if ( isWord(symbol) ) {
-            //insert(word, words);
-            countWord += 1;
+            insert(word, words);
+            insert(word, wordsStatistics);
+            word = "";
+            quantityWords += 1;
         }
     }
     file.close();
@@ -129,6 +149,7 @@ void TextHandler::parseText() {
 
 std::ostream& operator<<(std::ostream& out, const TextHandler& handler) {
     out << "Symbols found: " << handler.getQuantity() << std::endl;
+    out << "Words found: " << handler.getQuantityWords() << std::endl;
     out << "Letters statistic:" << std::endl;
     out << "Unique: " << handler.getCharacters() << std::endl;
     out << "Matches in text: " << std::endl;
@@ -144,7 +165,10 @@ std::ostream& operator<<(std::ostream& out, const TextHandler& handler) {
     out << "Matches in text: " << std::endl;
     out << handler.getSpecialSymbolsStatistics() << std::endl;
 
-    out << "Words count: " << handler.countWord << std::endl;
-    out << "Words found: " << handler.getWords() << std::endl;
+    out << "Words statistics:" <<std::endl;
+    out << "Unique: " << handler.getWords() << std::endl;
+    out << "Matches in text: " << std::endl;
+    out << handler.getWordsStatistics() << std::endl;
+
     return out;
 }
